@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import ImageLightbox from './ImageLightbox'
+import CustomSelect from './CustomSelect'
 import { createWatermark } from '../api'
 
 function downloadUrl(url, filename) {
@@ -146,23 +147,37 @@ export default function WatermarkForm({ file }) {
       <h2>สร้างลายน้ำ (Mock)</h2>
       <div className="row">
         <label>ประเภทลายน้ำ</label>
-        <select value={type} onChange={(e) => setType(e.target.value)}>
-          <option value="text">ข้อความ</option>
-          <option value="image">รูปภาพ</option>
-        </select>
+        <CustomSelect
+          value={type}
+          onChange={setType}
+          options={[
+            { value: 'text', label: 'ข้อความ' },
+            { value: 'image', label: 'รูปภาพ' }
+          ]}
+        />
       </div>
 
       {type === 'text' && (
         <div className="row">
           <label>ข้อความ</label>
-          <input value={text} onChange={(e) => setText(e.target.value)} />
+          <input type="text" value={text} onChange={(e) => setText(e.target.value)} />
         </div>
       )}
 
       {type === 'image' && (
         <div className="row">
           <label>อัปโหลดโลโก้</label>
-          <input type="file" accept="image/*" onChange={(e) => setLogoFile(e.target.files[0])} />
+          <div className="logo-file-input">
+            <label className="logo-file-button">
+              เลือกไฟล์
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setLogoFile(e.target.files[0] || null)}
+              />
+            </label>
+            <span className="logo-file-name">{logoFile ? logoFile.name : 'ยังไม่ได้เลือกไฟล์'}</span>
+          </div>
           {logoPreviewUrl && (
             <div style={{marginTop:8, display:'flex', alignItems:'center', gap:8}}>
               <img src={logoPreviewUrl} alt="logo preview" style={{height:56, borderRadius:6, cursor:'zoom-in'}} onClick={() => setLightboxSrc(logoPreviewUrl)} />
@@ -177,11 +192,15 @@ export default function WatermarkForm({ file }) {
 
       <div className="row">
         <label>ตำแหน่ง</label>
-        <select value={pos} onChange={(e) => setPos(e.target.value)}>
-          <option value="top-left">มุมบนซ้าย</option>
-          <option value="center">กึ่งกลาง</option>
-          <option value="bottom-right">มุมล่างขวา</option>
-        </select>
+        <CustomSelect
+          value={pos}
+          onChange={setPos}
+          options={[
+            { value: 'top-left', label: 'มุมบนซ้าย' },
+            { value: 'center', label: 'กึ่งกลาง' },
+            { value: 'bottom-right', label: 'มุมล่างขวา' }
+          ]}
+        />
       </div>
 
       <div className="row">
@@ -190,7 +209,7 @@ export default function WatermarkForm({ file }) {
       </div>
 
       <div className="row">
-        <button onClick={onApply} disabled={!file}>Generate Preview</button>
+        <button className="preview" onClick={onApply} disabled={!file}>Generate Preview</button>
         {previewUrl && (
           <>
             <div style={{marginTop:8}}>
@@ -200,7 +219,7 @@ export default function WatermarkForm({ file }) {
               <img src={previewUrl} alt="preview" style={{maxWidth: '100%', cursor:'zoom-in'}} onClick={() => setLightboxSrc(previewUrl)} />
             </div>
             <div style={{marginTop:8}}>
-              <button onClick={onDownloadPreview}>Download</button>
+              <button className='preview' onClick={onDownloadPreview}>Download</button>
             </div>
             {lightboxSrc && <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />}
           </>

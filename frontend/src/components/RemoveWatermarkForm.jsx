@@ -5,6 +5,7 @@ import { removeWatermark } from '../api'
 export default function RemoveWatermarkForm({ file }) {
   const [previewUrl, setPreviewUrl] = useState(null)
   const [previewName, setPreviewName] = useState(null)
+  const [lightboxSrc, setLightboxSrc] = useState(null)
 
   useEffect(() => {
     if (!file) {
@@ -47,7 +48,7 @@ export default function RemoveWatermarkForm({ file }) {
       <h2>ถอดลายน้ำ (Mock)</h2>
       <p>ฟีเจอร์ถอดลายน้ำยังเป็น mock — แสดงตัวอย่างไฟล์ต้นฉบับ และดาวน์โหลดเป็นตัวอย่าง</p>
       <div className="row">
-        <button onClick={onDownload} disabled={!previewUrl}>ดาวน์โหลดไฟล์ตัวอย่าง (Mock)</button>
+        <button className="preview" onClick={onDownload} disabled={!previewUrl}>ดาวน์โหลดไฟล์ตัวอย่าง (Mock)</button>
       </div>
 
       {previewUrl && (
