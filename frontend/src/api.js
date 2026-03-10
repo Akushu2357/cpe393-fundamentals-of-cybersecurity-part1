@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000'
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4001'
 
 export async function createWatermark({ file, type, text, pos, opacity, logo }) {
   const fd = new FormData()
