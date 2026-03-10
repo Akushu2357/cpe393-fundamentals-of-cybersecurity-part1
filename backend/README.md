@@ -1,16 +1,21 @@
-# Mock Backend for Watermark App
+# FastAPI mock backend example
 
-This is a small Express mock server implementing two endpoints used by the frontend during development:
+This folder contains a minimal FastAPI example that exposes the same mock endpoints as the Node mock server.
 
-- `POST /api/watermark/create` — multipart/form-data: `file` (required), `type` (`text` or `image`), `text`, `pos` (`top-left`|`center`|`bottom-right`), `opacity` (0-1), optional `logo` for image watermark. For images the server applies a simple watermark using `jimp` and returns the processed image. For PDFs the server echoes the uploaded PDF back (mock behavior).
-- `POST /api/watermark/remove` — multipart/form-data: `file` (required). Mock: returns the original file as `removed-<name>`.
+Files:
+- `requirements.txt` — Python dependencies
+- `app.py` — FastAPI app with endpoints:
+  - `POST /api/watermark/create` — accepts `file`, `type`, `text`, `pos`, `opacity`, optional `logo`. For images it applies a simple watermark using Pillow and returns a JPEG. For PDFs it echoes the file back (mock).
+  - `POST /api/watermark/remove` — accepts `file` and returns the same file as `removed-<name>` (mock).
 
-Quick start:
+Quick start (python 3.10+ recommended):
 
 ```bash
-cd backend
-npm install
-npm start
+cd backend/fastapi
+python -m venv .venv
+source .venv/bin/activate    # on Windows: .\.venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app:app --host 0.0.0.0 --port 4001
 ```
 
-The server runs on port `4000` by default. CORS is enabled for local development.
+Frontend can point `VITE_API_BASE` to `http://localhost:4001` to use this FastAPI mock instead of the Node mock.
