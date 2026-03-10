@@ -20,7 +20,7 @@ main{display:grid;grid-template-columns:1fr 420px;gap:24px}
 .card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);border:1px solid rgba(15,23,42,0.04)}
 .left{display:flex;flex-direction:column;gap:12px}
 .right{display:flex;flex-direction:column;gap:12px}
-.dropzone{border:1px dashed rgba(15,23,42,0.08);padding:26px;text-align:center;cursor:pointer;border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,0.6),transparent)}
+.dropzone{border:1px dashed rgba(15,23,42,0.08);padding:100px 26px;text-align:center;cursor:pointer;border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,0.6),transparent)}
 .dropzone.dragging{background:linear-gradient(180deg,rgba(11,95,255,0.06),rgba(59,130,246,0.02));border-color:rgba(11,95,255,0.5)}
 .dropzone p{margin:0;color:var(--muted)}
 .preview-area{margin-top:10px;border-radius:8px;padding:12px;min-height:260px;display:flex;flex-direction:column;gap:8px}
@@ -45,6 +45,14 @@ main{display:grid;grid-template-columns:1fr 420px;gap:24px}
 .logo-file-input input[type="file"]{display:none}
 .logo-file-button{padding:8px 14px;border-radius:999px;border:1px solid rgba(15,23,42,0.12);background:#f9fafb;cursor:pointer;font-size:13px;color:var(--accent);font-weight:600}
 .logo-file-name{font-size:13px;color:var(--muted);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* small variant used inside form sections */
+.sub-toggle{gap:8px;margin-bottom:6px}
+.shadow-pixel-form h2{margin:0 0 6px 0;font-size:18px}
+.row input[type="password"]{padding:10px 12px;border-radius:8px;border:1px solid rgba(15,23,42,0.06)}
+.form textarea{min-height:100px;padding:10px;border-radius:8px;border:1px solid rgba(15,23,42,0.06);resize:vertical}
+.form .row label{font-weight:600;color:#0f172a;margin-bottom:6px}
+.form .preview{padding:10px 14px;border-radius:8px}
+.result-area h3,.result-area h4{margin:6px 0}
 /* custom select */
 .custom-select{position:relative;width:100%}
 .custom-select.disabled{opacity:0.5;pointer-events:none}
@@ -65,3 +73,19 @@ main{display:grid;grid-template-columns:1fr 420px;gap:24px}
 .lightbox-toolbar{display:flex;gap:8px;align-items:center;margin-bottom:8px}
 .lightbox-canvas{background:rgba(255,255,255,0.02);border-radius:8px;padding:8px;overflow:auto;max-height:80vh;display:flex;align-items:center;justify-content:center}
 .lightbox-canvas img{max-width:100%;max-height:80vh;transition:transform 120ms ease}
+
+/* ShadowPixelForm / Stego result styles */
+.result-area{margin-top:12px;background:var(--card);border-radius:8px;padding:12px;border:1px solid rgba(15,23,42,0.04)}
+.preview-block{display:flex;align-items:center;justify-content:center;padding:8px}
+.preview-image{max-width:100%;height:auto;border-radius:8px;box-shadow:0 6px 18px rgba(2,6,23,0.06);display:block}
+.mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Segoe UI Mono", monospace;background:#fbfdff;padding:10px;border-radius:6px;border:1px solid rgba(15,23,42,0.04);color:#0f172a}
+.extracted-block{display:flex;flex-direction:column;gap:8px}
+
+/* Generic link-as-button used in ShadowPixelForm */
+.button{display:inline-block;padding:8px 12px;border-radius:8px;background:var(--accent);color:#ffffff;text-decoration:none;font-weight:600}
+.button.preview{background:linear-gradient(90deg,var(--accent),#3b82f6);box-shadow:var(--shadow)}
+.button.secondary{background:transparent;color:var(--accent);border:1px solid rgba(11,95,255,0.12)}
+
+@media (max-width:640px){
+  .preview-card img, .preview-image{max-height:320px}
+}

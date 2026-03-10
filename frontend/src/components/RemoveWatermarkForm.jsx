@@ -51,7 +51,7 @@ export default function RemoveWatermarkForm({ file }) {
         <button className="preview" onClick={onDownload} disabled={!previewUrl}>ดาวน์โหลดไฟล์ตัวอย่าง (Mock)</button>
       </div>
 
-      {previewUrl && (
+      {previewUrl && file && (
         <div className="row" style={{marginTop:8}}>
           <strong>Preview:</strong>
           {file.type && file.type.startsWith('image/') && (
