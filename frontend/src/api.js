@@ -35,3 +35,38 @@ export async function removeWatermark({ file }) {
   const blob = await res.blob()
   return blob
 }
+
+export async function hideData({ file, message, password }) {
+  const fd = new FormData()
+  fd.append('file', file)
+  fd.append('message', message)
+  fd.append('password', password)
+
+  const res = await fetch(`${API_BASE}/api/stego/hide`, {
+    method: 'POST',
+    body: fd,
+  })
+  if (!res.ok) {
+    const txt = await res.json()
+    throw new Error(txt.error || 'Server error')
+  }
+  const psnr = res.headers.get('X-PSNR')
+  const blob = await res.blob()
+  return { blob, psnr }
+}
+
+export async function extractData({ file, password }) {
+  const fd = new FormData()
+  fd.append('file', file)
+  fd.append('password', password)
+
+  const res = await fetch(`${API_BASE}/api/stego/extract`, {
+    method: 'POST',
+    body: fd,
+  })
+  if (!res.ok) {
+    const txt = await res.json()
+    throw new Error(txt.error || 'Server error')
+  }
+  return await res.json()
+}

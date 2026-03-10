@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import UploadPreview from './components/UploadPreview'
 import WatermarkForm from './components/WatermarkForm'
 import RemoveWatermarkForm from './components/RemoveWatermarkForm'
+import ShadowPixelForm from './components/ShadowPixelForm'
 
 export default function App() {
   const [mode, setMode] = useState('create') // 'create' or 'remove'
@@ -16,8 +17,9 @@ export default function App() {
         </div>
 
         <div className="mode-toggle">
-          <button onClick={() => setMode('create')} className={mode === 'create' ? 'active' : ''}>สร้างลายน้ำ</button>
-          <button onClick={() => setMode('remove')} className={mode === 'remove' ? 'active' : ''}>ถอดลายน้ำ</button>
+          <button onClick={() => setMode('create')} className={mode === 'create' ? 'active' : ''}>Watermark (Visible)</button>
+          <button onClick={() => setMode('remove')} className={mode === 'remove' ? 'active' : ''}>Remove Watermark</button>
+          <button onClick={() => setMode('shadow')} className={mode === 'shadow' ? 'active' : 'stego-btn'}>Shadow-Pixel (Secret)</button>
         </div>
       </header>
 
@@ -32,8 +34,10 @@ export default function App() {
           <div className="card">
             {mode === 'create' ? (
               <WatermarkForm file={file} />
-            ) : (
+            ) : mode === 'remove' ? (
               <RemoveWatermarkForm file={file} />
+            ) : (
+              <ShadowPixelForm file={file} />
             )}
           </div>
         </section>

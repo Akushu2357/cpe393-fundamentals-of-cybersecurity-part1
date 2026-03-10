@@ -4,6 +4,7 @@ from fastapi.responses import StreamingResponse, JSONResponse
 from typing import Optional
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
 import io
+from shadow_pixel import ShadowCrypto, ShadowStego
 
 app = FastAPI(title="Watermark Mock (FastAPI)")
 
@@ -32,7 +33,11 @@ def _compose_text_watermark(base: Image.Image, text: str, pos: str, opacity: flo
     except Exception:
         font = ImageFont.load_default()
 
-    text_w, text_h = draw.textsize(text, font=font)
+    # textbbox returns (left, top, right, bottom)
+    left, top, right, bottom = draw.textbbox((0, 0), text, font=font)
+    text_w = right - left
+    text_h = bottom - top
+    
     if pos == "top-left":
         x, y = 24, 24
     elif pos == "bottom-right":
@@ -123,6 +128,65 @@ async def remove_watermark(file: UploadFile = File(...)):
         buf = io.BytesIO(contents)
         buf.seek(0)
         return StreamingResponse(buf, media_type=file.content_type or "application/octet-stream", headers={"Content-Disposition": f"attachment; filename=removed-{file.filename}"})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+
+@app.post("/api/stego/hide")
+async def stego_hide(
+    file: UploadFile = File(...),
+    message: str = Form(...),
+    password: str = Form(...)
+):
+    try:
+        contents = await file.read()
+        img = Image.open(io.BytesIO(contents))
+        
+        # 1. Encrypt
+        payload = ShadowCrypto.encrypt(message, password)
+        
+        # 2. Embed (RLSB using password as seed)
+        stego_img = ShadowStego.embed_to_pil(img, payload, password)
+        
+        # 3. Calculate PSNR (Optional but good for quality check)
+        psnr = ShadowStego.calculate_psnr(img, stego_img)
+        
+        buf = io.BytesIO()
+        stego_img.save(buf, format="PNG", optimize=False, compress_level=0)
+        buf.seek(0)
+        
+        return StreamingResponse(
+            buf, 
+            media_type="image/png", 
+            headers={
+                "Content-Disposition": f"attachment; filename=shadow-{file.filename}",
+                "X-PSNR": f"{psnr:.2f}"
+            }
+        )
+    except Exception as e:
+        return JSONResponse(status_code=400, content={"error": str(e)})
+
+
+@app.post("/api/stego/extract")
+async def stego_extract(
+    file: UploadFile = File(...),
+    password: str = Form(...)
+):
+    try:
+        contents = await file.read()
+        img = Image.open(io.BytesIO(contents))
+        
+        # 1. Extract payload
+        payload = ShadowStego.extract_from_pil(img, password)
+        if not payload:
+            return JSONResponse(status_code=400, content={"error": "No hidden data found or wrong password."})
+            
+        # 2. Decrypt
+        decrypted = ShadowCrypto.decrypt(payload, password)
+        if not decrypted:
+            return JSONResponse(status_code=400, content={"error": "Decryption failed (Integrity check failed)."})
+            
+        return {"ok": True, "message": decrypted}
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
 
