@@ -1,21 +1,27 @@
-# FastAPI mock backend example
+# Backend (FastAPI)
 
-This folder contains a minimal FastAPI example that exposes the same mock endpoints as the Node mock server.
+Minimal FastAPI backend that provides example endpoints for watermarking and a simple steganography (shadow-pixel) workflow.
 
-Files:
+Key files
 - `requirements.txt` — Python dependencies
-- `app.py` — FastAPI app with endpoints:
-  - `POST /api/watermark/create` — accepts `file`, `type`, `text`, `pos`, `opacity`, optional `logo`. For images it applies a simple watermark using Pillow and returns a JPEG. For PDFs it echoes the file back (mock).
-  - `POST /api/watermark/remove` — accepts `file` and returns the same file as `removed-<name>` (mock).
+- `app.py` — FastAPI application and endpoint implementations
+- `shadow_pixel.py` — `ShadowCrypto` (AES-256-GCM + scrypt) and `ShadowStego` (permutation-based LSB steganography)
 
-Quick start (python 3.10+ recommended):
+Main endpoints (see `app.py` for full details):
+- `GET /` — health/status
+- `POST /api/watermark/create` — Upload a file and apply a visible watermark. Accepts form fields: `type` (`text` or `image`), `text`, `pos`, `opacity`, and optional `logo` for image-watermarking. Images return a JPEG; other files are echoed back as a mock behavior.
+- `POST /api/watermark/remove` — Upload a file and receive a mocked "removed" file as a response.
+- `POST /api/stego/hide` — Embed data into an image. Form fields: `file` (image), `message` (optional), `password` (required), `embed_image` (optional). Returns a PNG stego image and `X-PSNR` header.
+- `POST /api/stego/extract` — Extract hidden payload from an image using `password`. Returns JSON with `message` and/or `embedded_image` (data URL) when present.
 
-```bash
+Quick start (Python 3.10+ recommended):
+
+```powershell
 cd backend
 python -m venv .venv
-source .venv/bin/activate    # on Windows: .\.venv\Scripts\activate
+.venv\Scripts\Activate.ps1    # PowerShell
 pip install -r requirements.txt
-uvicorn app:app --host 0.0.0.0 --port 4001
+uvicorn app:app --host 0.0.0.0 --port 4000
 ```
 
-Frontend can point `VITE_API_BASE` to `http://localhost:4001` to use this FastAPI mock instead of the Node mock.
+To point the frontend to this backend, set `VITE_API_BASE` to `http://localhost:4000` or update `frontend/src/api.js` accordingly.

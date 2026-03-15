@@ -122,7 +122,7 @@ export default function ShadowPixelForm({ file }) {
                                 <img src={resultUrl} alt="stego result" className="preview-image" />
                             </div>
                             <div style={{ marginTop: 10 }}>
-                                <a href={resultUrl} download={`shadow-${file.name}`} className="button preview">ดาวน์โหลดภาพ</a>
+                                <a href={resultUrl} download={`shadow-${file?.name}`} className="button preview">ดาวน์โหลดภาพ</a>
                             </div>
                         </div>
                     )}
@@ -158,7 +158,7 @@ export default function ShadowPixelForm({ file }) {
                                 <img src={embeddedImageUrl} alt="embedded" className="preview-image" />
                             </div>
                             <div style={{ marginTop: 8 }}>
-                                <a href={embeddedImageUrl} download={`embedded-${file.name}`} className="button preview">ดาวน์โหลดรูปที่ฝัง</a>
+                                <a href={embeddedImageUrl} download={`embedded-${file?.name || 'picture'}`} className="button preview">ดาวน์โหลดรูปที่ฝัง</a>
                             </div>
                         </div>
                     )}

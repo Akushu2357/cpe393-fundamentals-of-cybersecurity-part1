@@ -1,17 +1,30 @@
-# Watermark Frontend (Mock)
+# Frontend
 
-This is a small React + Vite frontend that provides a mock UI for:
-- Uploading images and PDFs
-- Previewing images and PDF pages
-- Applying a text/image watermark to images or the first page of a PDF (mock, produced as an image)
-- Mock removal (returns original file)
+React + Vite frontend for the Watermark Studio UI.
 
-Quick start:
+Requirements
+- Node.js 16+ and npm or yarn
 
+Install and run (development)
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-Open http://localhost:5173
+Build for production
+```bash
+npm run build
+```
+
+After running `npm run dev`, Vite will print the local dev URL (usually http://localhost:5173).
+
+API configuration
+The frontend client uses `VITE_API_BASE` (environment variable) or the default value in `frontend/src/api.js` to determine the backend base URL. Set `VITE_API_BASE` to `http://localhost:4001` to use the FastAPI backend shipped in this repo.
+
+Key directories
+- `src/` — main React source
+- `src/components/` — UI components (e.g. `ShadowPixelForm.jsx`, `WatermarkForm.jsx`)
+- `index.html`, `vite.config.js` — Vite config and entry
+
+If you want more detailed usage examples for the components or the API client, I can add them.
