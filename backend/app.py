@@ -4,7 +4,7 @@ from fastapi.responses import StreamingResponse, JSONResponse
 from typing import Optional
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
 import io
-from shadow_pixel import ShadowCrypto, ShadowStego
+from shadow_pixel import ShadowCrypto, ShadowStego, compress, decompress
 import base64
 import struct
 
@@ -165,8 +165,16 @@ async def stego_hide(
 
         payload_bytes = _build_payload(message_bytes, embed_img_bytes, embed_img_mime)
 
-        # 1. Encrypt (pass raw bytes)
-        payload = ShadowCrypto.encrypt(payload_bytes, password)
+        # 1. Compress then encrypt
+        payload_compressed = compress(payload_bytes)
+        payload = ShadowCrypto.encrypt(payload_compressed, password)
+
+        # quick capacity check moved to app layer so we can return a clean HTTP error
+        full_payload = ShadowStego.MAGIC_BYTES + len(payload).to_bytes(4, 'big') + payload
+        total_bits = len(full_payload) * 8
+        capacity = ShadowStego.capacity_bits(img.width, img.height)
+        if total_bits > capacity:
+            return JSONResponse(status_code=400, content={"error": f"Payload too large! Need {total_bits} bits, have {capacity}"})
 
         # 2. Embed (RLSB using password as seed)
         stego_img = ShadowStego.embed_to_pil(img, payload, password)
@@ -209,30 +217,32 @@ async def stego_extract(
         if decrypted_bytes is None:
             return JSONResponse(status_code=400, content={"error": "Decryption failed (Integrity check failed)."})
 
-        # 3. Parse TLV (type 1=text, type 2=image)
+        # 3. Decompress (caller-level) then parse TLV (type 1=text, type 2=image)
+        decompressed = decompress(decrypted_bytes)
+
         i = 0
         result = {"ok": True}
         try:
-            while i < len(decrypted_bytes):
-                t = decrypted_bytes[i]
+            while i < len(decompressed):
+                t = decompressed[i]
                 i += 1
                 if t == 1:
-                    length = int.from_bytes(decrypted_bytes[i:i+4], 'big')
+                    length = int.from_bytes(decompressed[i:i+4], 'big')
                     i += 4
-                    text = decrypted_bytes[i:i+length].decode('utf-8')
+                    text = decompressed[i:i+length].decode('utf-8')
                     i += length
                     if 'message' not in result:
                         result['message'] = text
                     else:
                         result.setdefault('extra_text', []).append(text)
                 elif t == 2:
-                    mime_len = decrypted_bytes[i]
+                    mime_len = decompressed[i]
                     i += 1
-                    mime = decrypted_bytes[i:i+mime_len].decode('utf-8')
+                    mime = decompressed[i:i+mime_len].decode('utf-8')
                     i += mime_len
-                    length = int.from_bytes(decrypted_bytes[i:i+4], 'big')
+                    length = int.from_bytes(decompressed[i:i+4], 'big')
                     i += 4
-                    img_bytes = decrypted_bytes[i:i+length]
+                    img_bytes = decompressed[i:i+length]
                     i += length
                     b64 = base64.b64encode(img_bytes).decode('ascii')
                     result['embedded_image'] = f"data:{mime};base64,{b64}"

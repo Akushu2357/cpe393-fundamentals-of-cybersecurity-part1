@@ -35,11 +35,8 @@ class ShadowCrypto:
         nonce = get_random_bytes(12)
         cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
 
-        # 3) compress the bytes to reduce size before encryption
-        compressed = zlib.compress(data_bytes, level=9)
-
-        # 4) encrypt and return the concatenated blob
-        ciphertext, tag = cipher.encrypt_and_digest(compressed)
+        # 3) encrypt and return the concatenated blob
+        ciphertext, tag = cipher.encrypt_and_digest(data_bytes)
         return salt + nonce + tag + ciphertext
 
     @classmethod
@@ -59,21 +56,36 @@ class ShadowCrypto:
             # 2) decrypt and verify the GCM tag (raises on integrity failure)
             decrypted_data = cipher.decrypt_and_verify(ciphertext, tag)
 
-            # 3) try to decompress; if decompression fails, fall back to raw
-            try:
-                decompressed = zlib.decompress(decrypted_data)
-            except zlib.error:
-                decompressed = decrypted_data
-
-            # 4) return raw bytes (caller decides how to interpret)
-            return decompressed
+            # 3) return raw bytes (caller decides how to interpret)
+            return decrypted_data
         except Exception as e:
             print(f"[DEBUG CRYPTO] Decryption Error: {str(e)}")
             return None
 
+
+def compress(data_bytes: bytes) -> bytes:
+    """Module-level helper: compress raw bytes using zlib.
+
+    Keeps the same behavior/level as the previous implementation.
+    """
+    return zlib.compress(data_bytes, level=9)
+
+
+def decompress(data_bytes: bytes) -> bytes:
+    """Module-level helper: decompress bytes if possible, else return original."""
+    try:
+        return zlib.decompress(data_bytes)
+    except zlib.error:
+        return data_bytes
+
 class ShadowStego:
     """Layer 2: Randomized LSB Steganography (Debug Mode)"""
     MAGIC_BYTES = b"SP"
+
+    @staticmethod
+    def capacity_bits(width: int, height: int) -> int:
+        """Return available LSB capacity in bits for an RGB image of given size."""
+        return width * height * 3
 
     @staticmethod
     def get_pixel_sequence(width, height, seed_data):
@@ -126,11 +138,6 @@ class ShadowStego:
         print(f"[DEBUG EMBED] Payload Size: {len(payload)} bytes")
         print(f"[DEBUG EMBED] Total bits (inc. header): {total_bits}")
         print(f"[DEBUG EMBED] Header (6 bytes): {full_payload[:6].hex()}")
-
-        # 3) quick capacity check (3 channels per pixel)
-        capacity = width * height * 3
-        if total_bits > capacity:
-            raise ValueError(f"Payload too large! Need {total_bits} bits, have {capacity}")
 
         # 4) convert image into a flat uint8 array for fast vector operations
         arr = np.array(img, dtype=np.uint8)
